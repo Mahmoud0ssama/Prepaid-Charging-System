@@ -51,6 +51,7 @@ public class MSC extends DatabaseManager {
 
             if (!userExists(msisdn)) {
                 System.out.println("User not found on DB for MSISDN: " + msisdn);
+                generateCDR(msisdn, LocalDateTime.now(), LocalDateTime.now(), BigDecimal.ZERO, "user not found on DB");
                 socket.close();
                 return;
             }
@@ -66,34 +67,51 @@ public class MSC extends DatabaseManager {
 
             System.out.println("Capturing UDP traffic and play via speaker …..");
 
+            boolean endCallReceived = false;
             while ((line = in.readLine()) != null) {
                 if ("End Call".equals(line)) {
                     System.out.println("Call End after receiving end call signaling message");
-                    if (scheduler != null) scheduler.shutdown();
-                    if (audioPlayer != null) audioPlayer.stop();
-                    generateCDR(msisdn, callStartTime, initialBalance);
+                    endCallReceived = true;
                     break;
                 }
             }
 
+            if (!endCallReceived) {
+                System.out.println("Call End due to client disconnect");
+            }
+
+            if (scheduler != null) scheduler.shutdown();
+            if (audioPlayer != null) audioPlayer.stop();
+            generateCDR(msisdn, callStartTime, LocalDateTime.now(), initialBalance, "Normal call Clearing");
+
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (scheduler != null && !scheduler.isShutdown()) scheduler.shutdown();
+            if (audioPlayer != null) audioPlayer.stop();
         }
     }
 
-    private static void generateCDR(String msisdn, LocalDateTime startTime, BigDecimal initialBalance) {
-        LocalDateTime endTime = LocalDateTime.now();
-        long duration = java.time.Duration.between(startTime, endTime).toMinutes();
-        if (duration < 1) duration = 1;
-        BigDecimal cost = BigDecimal.valueOf(duration);
-        BigDecimal balanceAfter = initialBalance.subtract(cost);
+    private static void generateCDR(String msisdn, LocalDateTime startTime, LocalDateTime endTime, BigDecimal initialBalance, String callResult) {
+        long duration = 0;
+        BigDecimal cost = BigDecimal.ZERO;
+        BigDecimal balanceAfter = initialBalance;
+
+        if ("Normal call Clearing".equals(callResult)) {
+            long seconds = java.time.Duration.between(startTime, endTime).getSeconds();
+            duration = (long) Math.ceil(seconds / 60.0);
+            if (duration < 1) duration = 1;
+            
+            cost = BigDecimal.valueOf(duration);
+            balanceAfter = initialBalance.subtract(cost);
+        }
 
         try (Connection conn = getConnection()) {
-            insertCDR(msisdn, startTime, endTime, (int) duration, "Normal call Clearing", cost, balanceAfter, conn);
+            insertCDR(msisdn, startTime, endTime, (int) duration, callResult, cost, balanceAfter, conn);
         } catch (Exception ignored) {}
 
-        String cdrLine = String.format("%s, %s, %s, %d, Normal call Clearing, %s, %s",
-                msisdn, startTime, endTime, duration, cost, balanceAfter);
+        String cdrLine = String.format("%s, %s, %s, %d, %s, %s, %s",
+                msisdn, startTime, endTime, duration, callResult, cost, balanceAfter);
         System.out.println("Generating CDR line: " + cdrLine);
 
         try (FileWriter fw = new FileWriter("/tmp/calls.cdr", true)) {
