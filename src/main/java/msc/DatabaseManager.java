@@ -3,11 +3,26 @@ package msc;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.Properties;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class DatabaseManager {
     private static final String URL = "jdbc:postgresql://ep-young-base-ah9o0a2g-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
-    private static final String USER = "neondb_owner";
-    private static final String PASSWORD = "npg_D0sq6ITeVRrn";
+    private static String USER = "neondb_owner";
+    private static String PASSWORD = "npg_RzPrL5BNAga1";
+
+    static {
+        Properties props = new Properties();
+        try (FileInputStream fis = new FileInputStream(".env")) {
+            props.load(fis);
+            USER = props.getProperty("PGUSER", USER);
+            PASSWORD = props.getProperty("PGPASSWORD", PASSWORD);
+        } catch (IOException e) {
+            if (System.getenv("PGUSER") != null) USER = System.getenv("PGUSER");
+            if (System.getenv("PGPASSWORD") != null) PASSWORD = System.getenv("PGPASSWORD");
+        }
+    }
 
     protected static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
