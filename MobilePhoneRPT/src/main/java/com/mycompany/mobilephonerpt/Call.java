@@ -3,30 +3,15 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 
-package com.mycompany.mobilephone;
+package com.mycompany.mobilephoneRPT;
 
 /**
  *
- * @author Omar
+ * @author Omar Gabr
  */
 public class Call {
  
- public static enum Status {
-        IDLE,
-        CALLING,
-        ANSWERED,
-    }
 
-    private volatile Status status;
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-    
     public Call(Boolean isActive) {
         this.isActive = isActive;
         this.duration=0;

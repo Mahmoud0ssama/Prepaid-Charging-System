@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.concurrent.*;
+import java.util.logging.Logger;
 
 public class MSC extends DatabaseManager {
     private static final int TCP_PORT = 5010;
@@ -14,7 +15,8 @@ public class MSC extends DatabaseManager {
     static {
         System.out.println("Waiting for voice call Signaling start message via TCP");
     }
-
+private static final Logger logger =
+            Logger.getLogger(MSC.class.getName());
     public static void main(String[] args) throws Exception {
         try (ServerSocket serverSocket = new ServerSocket(TCP_PORT)) {
             while (true) {
@@ -41,7 +43,8 @@ public class MSC extends DatabaseManager {
             String line;
             while ((line = in.readLine()) != null && msisdn == null) {
                 if (line.startsWith("Start Call ")) {
-                    msisdn = line.substring("Start Call ".length()).trim();
+                      msisdn = line.substring("Start Call ".length()).trim();
+                      logger.info("[MSC] Recieved MSISDN= "+ msisdn);
                     System.out.println("Accept Voice call start signaling message from MSISDN " + msisdn);
                     break;
                 }
