@@ -9,7 +9,7 @@ import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 public class MSC extends DatabaseManager {
-    private static final int TCP_PORT = 5010;
+    private static final int TCP_PORT = 5012;
     private static final int UDP_PORT = 5011;
 
     static {
@@ -22,11 +22,15 @@ private static final Logger logger =
             while (true) {
                 try {
                     Socket clientSocket = serverSocket.accept();
+                    //Debug: 
+                    logger.info("[MSC] Accepted TCP connection");
                     new Thread(() -> handleCall(clientSocket)).start();
+                    
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
+            
         }
     }
 
@@ -36,16 +40,23 @@ private static final Logger logger =
         BigDecimal initialBalance = null;
         ScheduledExecutorService scheduler = null;
         AudioPlayer audioPlayer = null;
+        //Debug: 
+        logger.info("[MSC] call handling thread Strated ");
 
         try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
-
+            //Debug: 
+            logger.info("MSC: Read buffer started");
             String line;
             while ((line = in.readLine()) != null && msisdn == null) {
+                 logger.info("[MSC] Received raw line: " + line);
                 if (line.startsWith("Start Call ")) {
+                    //Debug: 
+                    logger.info("[MSC] Call start signal recieved");
                       msisdn = line.substring("Start Call ".length()).trim();
+                      //Debug:
                       logger.info("[MSC] Recieved MSISDN= "+ msisdn);
-                    System.out.println("Accept Voice call start signaling message from MSISDN " + msisdn);
+                      System.out.println("Accept Voice call start signaling message from MSISDN " + msisdn);
                     break;
                 }
             }
@@ -73,6 +84,8 @@ private static final Logger logger =
             boolean endCallReceived = false;
             while ((line = in.readLine()) != null) {
                 if ("End Call".equals(line)) {
+                    //Debug:
+                    logger.info("[MSC] Recieved End Call signaling message from MSISDN= "+ msisdn);
                     System.out.println("Call End after receiving end call signaling message");
                     endCallReceived = true;
                     break;
