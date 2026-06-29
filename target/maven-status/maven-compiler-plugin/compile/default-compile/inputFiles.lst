@@ -1,3 +1,6 @@
 /home/omar/windows/D/omar/Telecom_ITI/26-Charging_System_Ericsson/ChargingProject/src/main/java/msc/AudioPlayer.java
 /home/omar/windows/D/omar/Telecom_ITI/26-Charging_System_Ericsson/ChargingProject/src/main/java/msc/DatabaseManager.java
 /home/omar/windows/D/omar/Telecom_ITI/26-Charging_System_Ericsson/ChargingProject/src/main/java/msc/MSC.java
+/home/omar/windows/D/omar/Telecom_ITI/26-Charging_System_Ericsson/ChargingProject/src/main/java/msc/web/CdrServlet.java
+/home/omar/windows/D/omar/Telecom_ITI/26-Charging_System_Ericsson/ChargingProject/src/main/java/msc/web/UserServlet.java
+/home/omar/windows/D/omar/Telecom_ITI/26-Charging_System_Ericsson/ChargingProject/src/main/java/msc/web/WebServer.java

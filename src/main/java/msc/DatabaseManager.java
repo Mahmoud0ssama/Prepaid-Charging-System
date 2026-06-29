@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.util.Properties;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;git 
 
 public class DatabaseManager {
     private static final String URL = "jdbc:postgresql://ep-young-base-ah9o0a2g-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
@@ -83,5 +85,52 @@ public class DatabaseManager {
             stmt.setBigDecimal(7, balanceAfter);
             stmt.executeUpdate();
         }
+    }
+
+    public static class CDR {
+        private String msisdn;
+        private LocalDateTime startTime;
+        private LocalDateTime endTime;
+        private int duration;
+        private String callResult;
+        private BigDecimal callCost;
+        private BigDecimal balanceAfterCall;
+
+        public CDR(String msisdn, LocalDateTime startTime, LocalDateTime endTime, int duration,
+                   String callResult, BigDecimal callCost, BigDecimal balanceAfterCall) {
+            this.msisdn = msisdn;
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.duration = duration;
+            this.callResult = callResult;
+            this.callCost = callCost;
+            this.balanceAfterCall = balanceAfterCall;
+        }
+
+        // Getters and setters
+    }
+
+    public static List<CDR> getAllCDRs() {
+        List<CDR> cdrs = new ArrayList<>();
+        String sql = "SELECT * FROM cdrs";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                CDR cdr = new CDR(
+                        rs.getString("msisdn"),
+                        rs.getTimestamp("start_time").toLocalDateTime(),
+                        rs.getTimestamp("end_time").toLocalDateTime(),
+                        rs.getInt("duration"),
+                        rs.getString("call_result"),
+                        rs.getBigDecimal("call_cost"),
+                        rs.getBigDecimal("balance_after_call")
+                );
+                cdrs.add(cdr);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return cdrs;
     }
 }
