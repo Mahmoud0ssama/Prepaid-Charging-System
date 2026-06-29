@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Prepaid Charging System Administration Console for User CRUD operations and CDR call log auditing.">
+    <title>Prepaid Telecom Dashboard</title>
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background Glowing Blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-logo">
+                <i class="fa-solid fa-tower-cell logo-icon"></i>
+                <div class="logo-text">
+                    <h1>PREPAID<span>CHARGING</span></h1>
+                    <p>MSC Administrative Control Console</p>
+                </div>
+            </div>
+            <div class="system-status">
+                <span class="pulse-indicator"></span>
+                <span class="status-label">MSC ENGINE: ONLINE</span>
+            </div>
+        </header>
+
+        <!-- Stats Counter Section -->
+        <section class="stats-grid">
+            <div class="stat-card" id="stat-total-subscribers">
+                <div class="stat-icon purple-gradient">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="stat-details">
+                    <h3>Total Subscribers</h3>
+                    <p class="stat-number" id="lbl-total-users">0</p>
+                </div>
+            </div>
+            <div class="stat-card" id="stat-system-balance">
+                <div class="stat-icon blue-gradient">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <div class="stat-details">
+                    <h3>Total Assets</h3>
+                    <p class="stat-number" id="lbl-total-balance">0.00 L.E.</p>
+                </div>
+            </div>
+            <div class="stat-card" id="stat-total-calls">
+                <div class="stat-icon teal-gradient">
+                    <i class="fa-solid fa-phone-volume"></i>
+                </div>
+                <div class="stat-details">
+                    <h3>Call Sessions</h3>
+                    <p class="stat-number" id="lbl-total-calls">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Panel Grid -->
+        <main class="panel-grid">
+            <!-- Left Panel: User Management -->
+            <section class="panel-card subscribers-panel">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-user-gear icon-margin"></i>Subscribers Management</h2>
+                    <button class="btn btn-primary" id="btn-open-add-modal">
+                        <i class="fa-solid fa-user-plus"></i> Add Subscriber
+                    </button>
+                </div>
+                
+                <div class="panel-search-bar">
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="search-msisdn" placeholder="Search by MSISDN..." autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table" id="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>MSISDN (Phone)</th>
+                                <th>Current Balance</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Injected dynamically by JS -->
+                            <tr>
+                                <td colspan="4" class="table-loader">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> Loading subscribers...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Right Panel: Call History & Auditing -->
+            <section class="panel-card logs-panel">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-receipt icon-margin"></i>Recent CDR Logs</h2>
+                    <button class="btn btn-secondary" id="btn-refresh-cdrs">
+                        <i class="fa-solid fa-rotate"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table" id="cdrs-table">
+                        <thead>
+                            <tr>
+                                <th>MSISDN</th>
+                                <th>Duration</th>
+                                <th>Call Cost</th>
+                                <th>Call Status</th>
+                                <th>End Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cdrs-table-body">
+                            <!-- Injected dynamically by JS -->
+                            <tr>
+                                <td colspan="5" class="table-loader">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> Loading CDRs...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ADD USER MODAL -->
+    <div class="modal-backdrop" id="modal-add-user">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Add New Subscriber</h2>
+                <button class="btn-close-modal" id="btn-close-add"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-add-user" class="modal-form">
+                <div class="form-group">
+                    <label for="add-msisdn">MSISDN (Mobile Phone Number)</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-phone input-icon"></i>
+                        <input type="text" id="add-msisdn" name="msisdn" required placeholder="e.g. 01223456789" pattern="[0-9]{5,15}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="add-balance">Initial Balance (L.E.)</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-money-bill-1-wave input-icon"></i>
+                        <input type="number" id="add-balance" name="balance" required min="0" step="0.01" placeholder="e.g. 100.00">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary btn-cancel" id="btn-cancel-add">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Subscriber</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT USER MODAL -->
+    <div class="modal-backdrop" id="modal-edit-user">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Recharge & Modify Subscriber</h2>
+                <button class="btn-close-modal" id="btn-close-edit"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-edit-user" class="modal-form">
+                <input type="hidden" id="edit-id" name="id">
+                <div class="form-group">
+                    <label for="edit-msisdn">MSISDN (Mobile Phone Number)</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-phone input-icon"></i>
+                        <input type="text" id="edit-msisdn" name="msisdn" required placeholder="e.g. 01223456789" pattern="[0-9]{5,15}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edit-balance">Account Balance (L.E.)</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-wallet input-icon"></i>
+                        <input type="number" id="edit-balance" name="balance" required min="0" step="0.01" placeholder="e.g. 150.00">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary btn-cancel" id="btn-cancel-edit">Cancel</button>
+                    <button type="submit" class="btn btn-accent">Update Balance</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification System -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- JavaScript Bundle -->
+    <script src="app.js"></script>
+</body>
+</html>
