@@ -111,7 +111,6 @@ private static final Logger logger =
                     
                     call.setStatus(Call.Status.CALLING);
                     call.setIsActive(true);
-                    SocketOut.print("Start Call ");
                     //Debug: 
                     logger.info("[MobilePhone] Call start signal send");
                     //for now , I'll set to answered directlly 
@@ -136,7 +135,7 @@ private static final Logger logger =
                     call.setStatus(Call.Status.IDLE);
                     call.setIsActive(false);    
                     //implement call ending logic
-                    SocketOut.print("End Call");
+                    SocketOut.println("End Call");
                     //Debug:
                     logger.info("[Mobile] Sending End Call signaling message to MSC ");
                     
