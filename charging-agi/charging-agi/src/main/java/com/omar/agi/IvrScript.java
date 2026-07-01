@@ -32,10 +32,10 @@ public class IvrScript extends BaseAgiScript {
         }
         //  Play greeting audio file found in /usr/share/asterisk/sounds/en/
         streamFile("hello"); 
-        
+      //  streamFile("please-enter-the-number");
         // requesting msisdn from user 
-        String msisdn = channel.getData(
-            "enter-num-blacklist", // sound file
+        String msisdn = getData(
+            "vm-enter-num-to-call", // sound file
             60000,                       // ms timeout = 1 minute
             11                           // max digits
         );        
