@@ -1,0 +1,9 @@
+msc/DatabaseManager$CDR.class
+msc/web/UserServlet.class
+msc/web/UserBalanceQuery.class
+msc/DatabaseManager$User.class
+msc/web/CdrServlet.class
+msc/MSC.class
+msc/AudioPlayer.class
+msc/web/WebServer.class
+msc/DatabaseManager.class

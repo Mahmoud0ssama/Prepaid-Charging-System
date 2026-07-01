@@ -18,6 +18,7 @@ public class WebServer {
         // Set API Endpoints
         context.addServlet(new ServletHolder(new UserServlet()), "/api/users");
         context.addServlet(new ServletHolder(new CdrServlet()), "/api/cdrs");
+        context.addServlet(new ServletHolder(new UserBalanceQuery()), "/api/users/balance");
 
         // Set Static Resource Servlet (HTML/CSS/JS)
         ServletHolder staticHolder = new ServletHolder("default", DefaultServlet.class);
