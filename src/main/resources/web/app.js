@@ -111,16 +111,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Rendering functions
     function renderUsers(users) {
         if (users.length === 0) {
-            usersTableBody.innerHTML = '<tr><td colspan="4" class="table-empty"><i class="fa-solid fa-user-slash"></i> No subscribers found</td></tr>';
+            usersTableBody.innerHTML = '<tr><td colspan="3" class="table-empty"><i class="fa-solid fa-user-slash"></i> No subscribers found</td></tr>';
             return;
         }
 
         usersTableBody.innerHTML = users.map(user => {
             const lowBalance = parseFloat(user.balance) <= 5.0 ? 'low' : '';
             return `
-                <tr id="user-row-${user.id}">
-                    <td><strong>#${user.id}</strong></td>
-                    <td><i class="fa-solid fa-hashtag text-secondary icon-margin"></i>${user.msisdn}</td>
+                <tr>
+                    <td>${user.msisdn}</td>
                     <td>
                         <span class="balance-badge ${lowBalance}">
                             ${parseFloat(user.balance).toFixed(2)} L.E.

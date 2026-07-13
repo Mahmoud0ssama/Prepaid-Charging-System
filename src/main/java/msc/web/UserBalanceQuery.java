@@ -17,15 +17,16 @@ public class UserBalanceQuery extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         String msisdn = req.getParameter("msisdn");
         if (msisdn != null && !msisdn.trim().isEmpty()) {
-            
             BigDecimal balance = DatabaseManager.queryBalance(msisdn);
-            resp.getWriter().write(balance.toString());
-            //need to  implememnt handling for null reterning 
-
-        }else { 
+            if (balance == null) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 resp.getWriter().write("{\"error\": \"User not found\"}");
-
+            } else {
+                resp.getWriter().write(balance.toString());
+            }
+        } else {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("{\"error\": \"msisdn required\"}");
         }
 
     }
