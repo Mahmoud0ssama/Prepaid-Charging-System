@@ -1,15 +1,21 @@
 package msc.web;
 
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.URL;
 
 public class WebServer {
     public static void main(String[] args) {
-        int port = 8080;
-        Server server = new Server(port);
+        int port = findAvailablePort(8080, 8090);
+        Server server = new Server();
+        ServerConnector connector = new ServerConnector(server);
+        connector.setPort(port);
+        server.addConnector(connector);
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
@@ -41,5 +47,15 @@ public class WebServer {
             System.err.println("Error starting Jetty Web Server:");
             e.printStackTrace();
         }
+    }
+
+    private static int findAvailablePort(int startPort, int endPort) {
+        for (int port = startPort; port <= endPort; port++) {
+            try (ServerSocket ignored = new ServerSocket(port)) {
+                return port;
+            } catch (IOException ignored) {
+            }
+        }
+        return 0;
     }
 }

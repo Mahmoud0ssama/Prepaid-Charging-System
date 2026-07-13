@@ -73,7 +73,7 @@ private static final Logger logger =
                 //every 1 minute print
                 try {
 
-                    Thread.sleep(1000);
+                    Thread.sleep(60000);
 
                     call.incrementDuration();
                     System.out.println(call.getDuration() + " minutes elapsed ");

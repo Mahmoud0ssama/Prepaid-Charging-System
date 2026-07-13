@@ -99,8 +99,20 @@ public class DatabaseManager {
     public static void insertCDR(String msisdn, LocalDateTime startTime, LocalDateTime endTime,
                                  int duration, String callResult, BigDecimal callCost,
                                  BigDecimal balanceAfter, Connection conn) throws SQLException {
-        String sql = "INSERT INTO cdrs (msisdn, start_time, end_time, duration, call_result, call_cost, balance_after_call) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        // Detect whether the cdrs table uses `duration` or `duration_minutes` column
+        String durCol = "duration";
+        try (ResultSet cols = conn.getMetaData().getColumns(null, null, "cdrs", "%")) {
+            boolean hasDurationMinutes = false;
+            while (cols.next()) {
+                String colName = cols.getString("COLUMN_NAME");
+                if ("duration_minutes".equalsIgnoreCase(colName)) { hasDurationMinutes = true; break; }
+            }
+            if (hasDurationMinutes) durCol = "duration_minutes";
+        }
+
+        String sql = String.format(
+                "INSERT INTO cdrs (msisdn, start_time, end_time, %s, call_result, call_cost, balance_after_call) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                durCol);
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, msisdn);
             stmt.setTimestamp(2, Timestamp.valueOf(startTime));
@@ -152,12 +164,23 @@ public class DatabaseManager {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
+            java.sql.ResultSetMetaData md = rs.getMetaData();
+            int colCount = md.getColumnCount();
+            boolean hasDuration = false;
+            boolean hasDurationMinutes = false;
+            for (int i = 1; i <= colCount; i++) {
+                String name = md.getColumnLabel(i);
+                if ("duration".equalsIgnoreCase(name)) hasDuration = true;
+                if ("duration_minutes".equalsIgnoreCase(name)) hasDurationMinutes = true;
+            }
+            String durCol = hasDuration ? "duration" : (hasDurationMinutes ? "duration_minutes" : "duration");
             while (rs.next()) {
+                int dur = rs.getInt(durCol);
                 CDR cdr = new CDR(
                         rs.getString("msisdn"),
                         rs.getTimestamp("start_time").toLocalDateTime(),
                         rs.getTimestamp("end_time").toLocalDateTime(),
-                        rs.getInt("duration"),
+                        dur,
                         rs.getString("call_result"),
                         rs.getBigDecimal("call_cost"),
                         rs.getBigDecimal("balance_after_call")
@@ -177,9 +200,16 @@ public class DatabaseManager {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
+            java.sql.ResultSetMetaData md = rs.getMetaData();
+            int colCount = md.getColumnCount();
+            boolean hasId = false;
+            for (int i = 1; i <= colCount; i++) {
+                String name = md.getColumnLabel(i);
+                if ("id".equalsIgnoreCase(name)) { hasId = true; break; }
+            }
             while (rs.next()) {
                 User user = new User(
-                        rs.getInt("id"),
+                        (hasId ? rs.getInt("id") : 0),
                         rs.getString("msisdn"),
                         rs.getBigDecimal("balance")
                 );
@@ -211,6 +241,19 @@ public class DatabaseManager {
             stmt.setString(1, msisdn);
             stmt.setBigDecimal(2, balance);
             stmt.setInt(3, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean updateBalanceByMsisdn(String msisdn, BigDecimal balance) {
+        String sql = "UPDATE users SET balance = ? WHERE msisdn = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setBigDecimal(1, balance);
+            stmt.setString(2, msisdn);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

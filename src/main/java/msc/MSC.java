@@ -124,6 +124,12 @@ private static final Logger logger =
 
         try (Connection conn = getConnection()) {
             insertCDR(msisdn, startTime, endTime, (int) duration, callResult, cost, balanceAfter, conn);
+            try {
+                // persist final balance to users table
+                DatabaseManager.updateBalanceByMsisdn(msisdn, balanceAfter);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } catch (Exception ignored) {}
 
         String cdrLine = String.format("%s, %s, %s, %d, %s, %s, %s",

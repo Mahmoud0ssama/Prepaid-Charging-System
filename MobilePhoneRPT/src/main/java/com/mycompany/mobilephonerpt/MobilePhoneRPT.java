@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  */
 
-package com.mycompany.mobilephoneRPT;
+package com.mycompany.mobilephonerpt;
 
 /**
  *
@@ -33,8 +33,13 @@ public class MobilePhoneRPT {
          //Thread 0: call start logic (connection and RTP )
          Thread voiceSender =  new Thread ( ()-> {
         
-               InetAddress receiverIP = InetAddress.getByName("127.0.0.1");
+               InetAddress receiverIP;
                int receiverPort = 5000;
+               try {
+                   receiverIP = InetAddress.getByName("127.0.0.1");
+               } catch (java.net.UnknownHostException ex) {
+                   throw new RuntimeException(ex);
+               }
                
                  AudioFormat format = new AudioFormat(
                     44100.0f, // Sample Rate
@@ -86,7 +91,7 @@ public class MobilePhoneRPT {
                 call.incrementDuration();
                 System.out.println(call.getDuration()+" minutes elapsed ");
             } catch (InterruptedException ex) {
-                System.getLogger(MobilePhone.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                System.getLogger(MobilePhoneRPT.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
             }
         }
         });
