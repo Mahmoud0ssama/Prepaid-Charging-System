@@ -1,4 +1,5 @@
-package com.omar.agi;
+
+package com.mycompany.agi;
 
 import org.asteriskjava.fastagi.AgiServer;
 import org.asteriskjava.fastagi.DefaultAgiServer;
@@ -6,7 +7,7 @@ import org.asteriskjava.fastagi.DefaultAgiServer;
  *
  * @author omar
  */
-public class App {
+public class AGI {
 
     public static void main(String[] args) throws Exception {
         AgiServer server = new DefaultAgiServer();

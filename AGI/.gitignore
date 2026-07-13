@@ -1,5 +1,0 @@
-.env
-target/
-*.jar
-.idea/
-*.class
