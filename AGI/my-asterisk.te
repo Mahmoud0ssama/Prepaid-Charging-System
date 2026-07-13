@@ -1,0 +1,21 @@
+
+module my-asterisk 1.0;
+
+require {
+	type config_home_t;
+	type unreserved_port_t;
+	type alsa_var_lib_t;
+	type var_lib_t;
+	type asterisk_t;
+	class file getattr;
+	class dir search;
+	class tcp_socket name_connect;
+}
+
+#============= asterisk_t ==============
+allow asterisk_t alsa_var_lib_t:dir search;
+allow asterisk_t config_home_t:dir search;
+
+#!!!! This avc can be allowed using the boolean 'nis_enabled'
+allow asterisk_t unreserved_port_t:tcp_socket name_connect;
+allow asterisk_t var_lib_t:file getattr;
